@@ -185,7 +185,7 @@ void micro_mouse::DFSAlgorithm::solve(micro_mouse::Maze& maze)
     
    int x = maze.get_x();
    int y = maze.get_y();
-   int heading = maze.get_heading();
+   
 
     static const int dx[4] = {0,1,0,-1}; // N, E, S, W
     static const int dy[4] = {1, 0, -1, 0}; // N, E, S, W
@@ -211,6 +211,8 @@ while(!stk_.empty() && !maze.is_at_goal())
     {
         nx = x + dx[dir];   //0 + 0
         ny = y + dy[dir];   // 0 + 1 = 1
+        if (nx < 0 || ny < 0 || nx >= maze.get_maze_width() || ny >= maze.get_maze_height())
+        continue;
 
         if(!maze.has_wall(x,y,dir) && !maze.is_visited(nx,ny))
         {
@@ -245,7 +247,21 @@ while(!stk_.empty() && !maze.is_at_goal())
         }
 
         else{
-            
+            auto entry = stk_.top();
+            stk_.pop();
+            if(entry.second == -1)
+            {
+                break;
+            }
+            int back_dir = (entry.second + 2)%4;
+            int turns_needed = (back_dir - maze.get_heading() + 4) % 4;
+
+            for(int i = 0; i <turns_needed;i++)
+            {
+                maze.turn_right();
+            }
+            maze.move_forward();
+
         }
     
 
