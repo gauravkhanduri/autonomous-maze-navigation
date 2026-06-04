@@ -241,7 +241,7 @@ while(!stk_.empty() && !maze.is_at_goal())
             maze.mark_visited(nx,ny);
             int new_idx = ny * maze.get_maze_width() + nx;
 
-            stk_.push({idx,next_dir});
+            stk_.push({new_idx,next_dir});
         }
 
         else{
