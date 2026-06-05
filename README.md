@@ -1,5 +1,22 @@
 # Autonomous Maze Navigation
 
+## ENPM702 RWA-IV: MicroMouse DFS Navigation
+
+A C++17 implementation of autonomous maze navigation using Depth-First Search (DFS). The robot explores a 16×16 maze, discovers walls, and navigates to the center goal cells using a stack-based DFS with backtracking.
+
+### Maze Navigation Demo
+
+![Maze Navigation](maze_navigation/images/maze.png)
+
+### Architecture
+
+- **Maze** — internal world model and sole wrapper around `MazeControlAPI`
+- **Algorithm** — abstract base with pure virtual `solve(Maze&)`
+- **DFSAlgorithm** — concrete DFS solver using a backtrack stack
+- **Robot** — owns a `Maze`, aggregates an `Algorithm`, drives the solve loop
+
+---
+
 A micromouse maze navigation project containing maze files and tooling for algorithm development, simulation, and testing.
 
 ## Repository Structure
