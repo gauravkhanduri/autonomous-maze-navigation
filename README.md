@@ -1,4 +1,4 @@
-# MicroMouse — Maze Navigation Robot
+# MicroMouse - Maze Navigation Robot
 
 > A simulated autonomous robot that explores an unknown maze, maps it as it
 > goes, and finds its way to the goal. Written in modern **C++17**.
@@ -8,7 +8,7 @@
 ## What it does
 
 Drop the robot into a maze it has never seen. It can only feel the walls
-directly around it — front, left, right — and can only step one cell at a time
+directly around it - front, left, right - and can only step one cell at a time
 relative to the way it's facing. From nothing but that, it:
 
 - **explores** the maze, sensing and recording walls as it moves,
@@ -19,7 +19,7 @@ relative to the way it's facing. From nothing but that, it:
 I built this to get hands-on with two things I find genuinely interesting:
 designing a clean object-oriented architecture from scratch, and implementing a
 classic search algorithm under a real-world constraint that textbooks usually
-ignore — **a robot can't teleport back to where it came from; it has to drive.**
+ignore - **a robot can't teleport back to where it came from; it has to drive.**
 
 This README walks through how it's built, in the order I built it: **design →
 behaviour → data structures → implementation.**
@@ -28,7 +28,7 @@ behaviour → data structures → implementation.**
 
 ## Table of contents
 
-- [MicroMouse — Maze Navigation Robot](#micromouse--maze-navigation-robot)
+- [MicroMouse - Maze Navigation Robot](#micromouse--maze-navigation-robot)
   - [What it does](#what-it-does)
   - [Table of contents](#table-of-contents)
   - [Design: architecture](#design-architecture)
@@ -55,23 +55,23 @@ relationships were explicit up front. Each class does exactly one thing:
 | `MazeControlAPI` | The low-level interface to the simulator. All static methods. The only code allowed to talk to the simulator directly. |
 | `Maze` | The robot's internal world-model **and** the single wrapper around `MazeControlAPI`. Holds known walls, dimensions, the goal, and the robot's pose. Every simulator command funnels through here. |
 | `Algorithm` | An **abstract** base class defining *what* a solver does (`solve()`), not *how*. |
-| `DFSAlgorithm` | A concrete solver — the *how*. Owns the search state (visited set + backtrack stack). |
+| `DFSAlgorithm` | A concrete solver - the *how*. Owns the search state (visited set + backtrack stack). |
 | `Robot` | The controller. Owns its `Maze` and hands the thinking off to whatever `Algorithm` it's given. |
 
 Three relationships hold the design together:
 
-- **Composition** — `Robot` *owns* its `Maze`. The maze is part of the robot's
+- **Composition** - `Robot` *owns* its `Maze`. The maze is part of the robot's
   state and is destroyed with it. (filled diamond ◆)
-- **Aggregation** — `Robot` *uses* an `Algorithm` handed in from outside. The
+- **Aggregation** - `Robot` *uses* an `Algorithm` handed in from outside. The
   robot doesn't own the algorithm's lifetime, so a strategy can be swapped or
   shared. (hollow diamond ◇)
-- **Inheritance + polymorphism** — `DFSAlgorithm` *is an* `Algorithm`. `Robot`
+- **Inheritance + polymorphism** - `DFSAlgorithm` *is an* `Algorithm`. `Robot`
   holds the base type and calls `solve()` through it, so the concrete strategy
   is resolved at runtime. Swapping in a different search needs zero changes to
   `Robot`.
 
 One rule I held throughout: **only `Maze` ever touches `MazeControlAPI`.** The
-algorithm and robot never call it directly — everything is routed
+algorithm and robot never call it directly - everything is routed
 `Algorithm → Maze → MazeControlAPI`. That keeps all the simulator coupling in
 exactly one place, and it's reflected consistently in both diagrams.
 
@@ -174,22 +174,22 @@ sequenceDiagram
 
 The robot solves the maze with **depth-first search**. The interesting twist
 over a textbook graph DFS is the physical constraint: when the search hits a
-dead end, the robot can't just "return" to an earlier node — it has to *drive
+dead end, the robot can't just "return" to an earlier node - it has to *drive
 back there*. That one fact decides the data structures.
 
 ### Data structures
 
-- **Cell identity** — each `(x, y)` is flattened into a single integer:
+- **Cell identity** - each `(x, y)` is flattened into a single integer:
   `index = y * width + x`. A "set of cells" becomes "an array indexed by int."
-- **Visited set** — `std::vector<bool>` sized `width * height`. O(1) lookup,
+- **Visited set** - `std::vector<bool>` sized `width * height`. O(1) lookup,
   marked the first time a cell is entered. This is **permanent memory**.
-- **Backtrack stack** — a stack of cells holding the **current path from start
+- **Backtrack stack** - a stack of cells holding the **current path from start
   to wherever the robot is now**. Each entry also records the direction it was
   entered from, so backtracking knows exactly how to reverse a step.
 
 > The idea I like most here: *visited* is permanent, the *stack* is just the
 > current route. When the robot reaches the goal, the stack **is** the solution
-> path — every dead end has already been popped off. I never compute the path
+> path - every dead end has already been popped off. I never compute the path
 > separately; the data structure hands it back for free.
 
 Directions are numbered `0=N, 1=E, 2=S, 3=W` with offset tables
@@ -206,14 +206,14 @@ At the current cell, each iteration:
 1. **Sense** the walls (front / left / right) and **record** them in the `Maze`.
 2. **Decide:** check the four neighbours. A neighbour is a *candidate* if
    there's no wall between it and the current cell **and** it hasn't been
-   visited. (This is where "blocked" is decided — by the search, not the API.)
+   visited. (This is where "blocked" is decided - by the search, not the API.)
 3. **If a candidate exists** → turn to face it, move forward, mark it visited,
    **push** it on the stack.
 4. **If none exists** → dead end. **Pop** the stack and drive back one cell.
 5. **Stop** at the goal (or when the stack empties, meaning no path exists).
 
 Because the visited set already records what's been explored, there's no need to
-track per-cell "which directions did I already try" — a backtracked cell just
+track per-cell "which directions did I already try" - a backtracked cell just
 finds its explored neighbours marked visited and skips them automatically.
 
 ---
@@ -273,7 +273,7 @@ maze_navigation/
 ## What I learned
 
 - **Designing for change pays off.** Because `Robot` depends on the abstract
-  `Algorithm`, adding a second strategy (see below) is a drop-in — no controller
+  `Algorithm`, adding a second strategy (see below) is a drop-in - no controller
   changes. Polymorphism stopped being a textbook word and became a practical lever.
 - **Encapsulating the one "dirty" dependency** (the simulator API) behind a
   single class kept the rest of the code clean and testable in my head.
@@ -284,7 +284,7 @@ maze_navigation/
 
 - **Shortest path:** DFS finds *a* path, not the *shortest*. A `BFSAlgorithm`
   (the interface is already there) or a flood-fill would find the optimal route
-  — a natural next strategy to plug in.
+  - a natural next strategy to plug in.
 - **Two-phase run:** explore first, then do a fast optimal run on the known map.
 - **Diagonal moves / speed optimisation** for a more competition-style solver.
 
